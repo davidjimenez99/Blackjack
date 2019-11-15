@@ -2,7 +2,7 @@ import socket
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 #host = '172.17.64.148'
-host = '172.32.131.20'
+host = '172.32.152.0'
 port = 4196
 try:
     client.connect((host, port))
@@ -51,8 +51,16 @@ while True:
         #continue
     elif data=="stay":
         print("Tus cartas son: ", cards, "= ", puntos)
-        exit()                                                              #Recibir info si ganó o perdió
+        #exit()                                                              #Recibir info si ganó o perdió
+        break
     else:
         cards.append(data)
         print(data)
         #print("Tus cartas son: ", cards)
+
+data=client.recv(1024)
+print(data.decode())
+    
+    
+
+client.close()
