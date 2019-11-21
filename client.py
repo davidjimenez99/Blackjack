@@ -1,65 +1,81 @@
 import socket
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = '172.32.152.32'
+host = '192.168.0.13'
 port = 4196
+#port = 8080
+
 try:
     client.connect((host, port))
 except socket.error as exc:
     print("En este momento no se puede conectar al juego")
     exit()
 
-data = client.recv(1024)
-print(data.decode())
 
-data = client.recv(1024)
-print(data.decode())
 
 cards=[]
 
-for x in range(2):
-    data=client.recv(1024)
-    cards.append(data.decode())
-    print(data.decode())
 
-while True:
+def sortCards(cards):
+    if 'A◆' in cards:
+        cards.append(cards.pop(cards.index('A◆')))
+    elif 'A♣' in cards:
+        cards.append(cards.pop(cards.index('A♣')))
+    elif 'A♥' in cards:
+        cards.append(cards.pop(cards.index('A♥')))
+    elif 'A♠' in cards:
+        cards.append(cards.pop(cards.index('A♠')))
 
+def count():
     puntos=0
-
-    if 'A' in cards:
-        cards.append(cards.pop(cards.index('A')))
-
+    sortCards(cards)
     for card in cards:
-        if card == 'J' or card == 'Q' or card == 'K':
+        if card[:-1] == 'J' or card[:-1] == 'Q' or card[:-1] == 'K':
             puntos += 10
-        elif card == 'A':
+        elif card[:-1] == 'A':
             if puntos <= 10:
                 puntos += 11
             else:
                 puntos += 1
         else:
-            puntos += int(card)
+            puntos += int(card[:-1])
+    return puntos
 
-    print("Tus cartas son: ", cards, " = ", puntos)
-
+def decide(puntos, client):
     if puntos < 17:
         client.send("hit".encode())
     else:
-        client.send("stay".encode())
+        client.send("hold".encode())
 
+'''
+for x in range(2):
     data=client.recv(1024)
-    data=data.decode()
+    cards.append(data.decode())
+    print(data.decode())
+'''
 
-    if data=="stay":
-        #print("Tus cartas son: ", cards, "= ", puntos)                      #QUITAR
-        #exit()                                                              #Recibir info si ganó o perdió
+
+while True:
+    data = client.recv(1024).decode()
+    if data == '?':
+        puntos = count()                                    #Método para contar los puntos que tiene
+        print("Tus cartas son: ", cards, " = ", puntos)
+        decide(puntos, client)                              #Método para decidir si se queda o pide otra
+        #break
+    elif '◆' in data or '♣' in data or '♥' in data or '♠' in data:
+        cards.append(data)
+        #print(data)
+        puntos = count() 
+        print("Tus cartas son: ", cards, " = ", puntos)
+    elif data == 'kill':
         break
     else:
-        cards.append(data)
         print(data)
+        
+    
 
-data=client.recv(1024)
-print(data.decode())
+data=client.recv(1024).decode()
+print(data)
     
     
 client.close()

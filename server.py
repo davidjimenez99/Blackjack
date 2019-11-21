@@ -1,5 +1,12 @@
-import socket, time, random
-
+import socket, time, random, threading
+'''
+def threadCountdown(name):
+    tiempo = 30
+    for x in range(30):
+        print('El juego comienza en', tiempo, 'segundos')
+        tiempo -= 1
+        time.sleep(1)
+'''
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostName = socket.gethostname()
 hostIp = socket.gethostbyname(hostName)
@@ -7,7 +14,7 @@ print(hostName, hostIp)
 server.bind((hostName, 4196))
 server.listen(3)
 
-deck = ['A','2','3','4','5','6','7','8','9','10','J','Q','K']*16                 # *4 un deck        *16 cuatro decks
+deck = ['A◆','2◆','3◆','4◆','5◆','6◆','7◆','8◆','9◆','10◆','J◆','Q◆','K◆','A♣','2♣','3♣','4♣','5♣','6♣','7♣','8♣','9♣','10♣','J♣','Q♣','K♣','A♥','2♥','3♥','4♥','5♥','6♥','7♥','8♥','9♥','10♥','J♥','Q♥','K♥','A♠','2♠','3♠','4♠','5♠','6♠','7♠','8♠','9♠','10♠','J♠','Q♠','K♠']*4
 clients = []
 
 game=True
@@ -18,8 +25,11 @@ while game:
     clients.append(connection)
     connection, address = server.accept()
     clients.append(connection)
-        
-    server.settimeout(5)                                                    #CAMBIAR A 30
+
+    #t = threading.Thread(target=threadCountdown, args=(1,))
+    #t.start()
+
+    server.settimeout(30)                                                    #CAMBIAR A 30
     connection = None
     try:
         connection, address = server.accept()
@@ -28,15 +38,13 @@ while game:
     server.settimeout(None)
     if connection is not None:
         clients.append(connection)
+        #DETENER THREAD
 
     for i, c in enumerate(clients):
-        c.send('Welcome to Blackjack!'.encode())
-        time.sleep(1)
         msg = 'Se te ha asignado el turno '+str(i+1)
         c.send(msg.encode())
     
     cards = [[]for y in clients]
-    #print(cards)
 
     contCl = 1
     for c in clients:
@@ -50,22 +58,31 @@ while game:
             c.send(card.encode())
             time.sleep(2)
         contCl += 1
-        time.sleep(2)
+        time.sleep(1)
 
     contCl = 1
 
     for i, c in enumerate(clients):
 
         while True:
+
+            c.send("?".encode())
+
             try:
                 data = c.recv(1024)
             except socket.error as exc:
                 print('Jugador se ha desconectado')
                 break
-            #print("ENTRO A WHILE DATA!=NONE")
 
             inp = data.decode()
-            if inp == 'hit':
+            if inp == 'hold':
+                print('El jugador', (i+1), 'se planta.')
+                c.send('kill'.encode())
+                #c.close()
+                time.sleep(2)
+                break
+
+            else:
                 rand = int(random.randint(0,(len(deck)-1)))
                 card = deck[rand]
                 print('Jugador',contCl,': ',card)
@@ -74,35 +91,32 @@ while game:
                 c.send(card.encode())
                 time.sleep(2)
 
-            else:
-                st = 'stay'
-                print('El jugador', (i+1), 'se planta.')
-                c.send(st.encode())
-                #c.close()
-                time.sleep(2)
-                break
-
             data = None
 
         contCl += 1
 
     puntos = [0 for x in clients]
     for i, c in enumerate(clients):
-        if 'A' in cards[i]:
-            cards[i].append(cards[i].pop(cards[i].index('A')))
+        if 'A◆' in cards[i]:
+            cards[i].append(cards[i].pop(cards[i].index('A◆')))
+        elif 'A♣' in cards[i]:
+            cards[i].append(cards[i].pop(cards[i].index('A◆')))
+        elif 'A♥' in cards[i]:
+            cards[i].append(cards[i].pop(cards[i].index('A♥')))
+        elif 'A♠' in cards[i]:
+            cards[i].append(cards[i].pop(cards[i].index('A♠')))
 
         for card in cards[i]:
-            if card == 'J' or card == 'Q' or card == 'K':
+            if card[:-1] == 'J' or card[:-1] == 'Q' or card[:-1] == 'K':
                 puntos[i] += 10
-            elif card == 'A':
+            elif card[:-1] == 'A':
                 if puntos[i] <= 10:
                     puntos[i] += 11
                 else:
                     puntos[i] += 1
             else:
-                puntos[i] += int(card)
+                puntos[i] += int(card[:-1])
 
-    print('puntos:',puntos)           ############################
     perd = []
     gan = []
     for x, punt in enumerate(puntos):
@@ -111,17 +125,18 @@ while game:
         elif punt <= 21:
             gan.append(x)               #ARREGLAR GANADOR
 
-    print('perdedor:',perd)           ############################
-    print('ganador:',gan)             ############################
+    #print('perdedor:',perd)                          ############################
+    #print('ganador:',gan)                            ############################
 
     for x, c in enumerate(clients):
         if x in perd:
             #print(x,c,perdedor)
-            c.send('PERDISTE'.encode())
+            c.send('HAS PERDIDO!'.encode())
+            #print('Jugador', (i+1), 'ha perdido!')
         else:
-            c.send('GANADOR'.encode())
+            c.send('HAS GANADO!'.encode())
             #print('Jugador', (i+1), 'ha ganado!')
 
     game=False
 
-print("EL JUEGO TERMINÓ")
+print('El jugador ### ha ganado!')
