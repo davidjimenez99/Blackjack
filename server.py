@@ -11,10 +11,10 @@ server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostName = socket.gethostname()
 hostIp = socket.gethostbyname(hostName)
 print(hostName, hostIp)
-server.bind((hostName, 4196))
+server.bind((hostName, 8080))
 server.listen(3)
 
-deck = ['A◆','2◆','3◆','4◆','5◆','6◆','7◆','8◆','9◆','10◆','J◆','Q◆','K◆','A♣','2♣','3♣','4♣','5♣','6♣','7♣','8♣','9♣','10♣','J♣','Q♣','K♣','A♥','2♥','3♥','4♥','5♥','6♥','7♥','8♥','9♥','10♥','J♥','Q♥','K♥','A♠','2♠','3♠','4♠','5♠','6♠','7♠','8♠','9♠','10♠','J♠','Q♠','K♠']*4
+deck = ['A♦','2♦','3♦','4♦','5♦','6♦','7♦','8♦','9♦','10♦','J♦','Q♦','K♦','A♣','2♣','3♣','4♣','5♣','6♣','7♣','8♣','9♣','10♣','J♣','Q♣','K♣','A♥','2♥','3♥','4♥','5♥','6♥','7♥','8♥','9♥','10♥','J♥','Q♥','K♥','A♠','2♠','3♠','4♠','5♠','6♠','7♠','8♠','9♠','10♠','J♠','Q♠','K♠']*4
 clients = []
 
 game=True
@@ -77,7 +77,6 @@ while game:
             inp = data.decode()
             if inp == 'hold':
                 print('El jugador', (i+1), 'se planta.')
-                c.send('kill'.encode())
                 #c.close()
                 time.sleep(2)
                 break
@@ -97,10 +96,10 @@ while game:
 
     puntos = [0 for x in clients]
     for i, c in enumerate(clients):
-        if 'A◆' in cards[i]:
-            cards[i].append(cards[i].pop(cards[i].index('A◆')))
+        if 'A♦' in cards[i]:
+            cards[i].append(cards[i].pop(cards[i].index('A♦')))
         elif 'A♣' in cards[i]:
-            cards[i].append(cards[i].pop(cards[i].index('A◆')))
+            cards[i].append(cards[i].pop(cards[i].index('A♣')))
         elif 'A♥' in cards[i]:
             cards[i].append(cards[i].pop(cards[i].index('A♥')))
         elif 'A♠' in cards[i]:
@@ -136,6 +135,8 @@ while game:
         else:
             c.send('HAS GANADO!'.encode())
             #print('Jugador', (i+1), 'ha ganado!')
+        c.send('kill'.encode())
+
 
     game=False
 
