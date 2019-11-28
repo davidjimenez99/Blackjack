@@ -95,6 +95,8 @@ while game:
         contCl += 1
 
     puntos = [0 for x in clients]
+    numCards = [0 for x in clients]
+
     for i, c in enumerate(clients):
         if 'A♦' in cards[i]:
             cards[i].append(cards[i].pop(cards[i].index('A♦')))
@@ -115,29 +117,52 @@ while game:
                     puntos[i] += 1
             else:
                 puntos[i] += int(card[:-1])
+            numCards[i] += 1
 
     perd = []
     gan = []
+    maxP = 0
+    pos = -1
     for x, punt in enumerate(puntos):
         if punt > 21:
             perd.append(x)
         elif punt <= 21:
-            gan.append(x)               #ARREGLAR GANADOR
+            if punt > maxP:
+                maxP = punt
+                pos = x
+            elif punt == maxP:
+                if numCards[x] < numCards[pos]:
+                    maxP = punt
+                    pos = x
+                    #FALTA CHECHAR SI TIENEN EL MISMO NUMERO DE CARTAS
+
+            
+    
+    gan.append(pos)
+
+
+
+
+
+
 
     #print('perdedor:',perd)                          ############################
     #print('ganador:',gan)                            ############################
 
     for x, c in enumerate(clients):
-        if x in perd:
+        if x in gan:
             #print(x,c,perdedor)
-            c.send('HAS PERDIDO!'.encode())
+            c.send('HAS GANADO!'.encode())
             #print('Jugador', (i+1), 'ha perdido!')
         else:
-            c.send('HAS GANADO!'.encode())
+            c.send('HAS PERDIDO!'.encode())
             #print('Jugador', (i+1), 'ha ganado!')
         c.send('kill'.encode())
 
 
     game=False
 
-print('El jugador ### ha ganado!')
+if len(gan) > 0:
+    print('El jugador', pos+1, 'ha ganado!')
+else:
+    print('Ningún jugador ha ganado!')
