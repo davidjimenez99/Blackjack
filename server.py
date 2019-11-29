@@ -1,12 +1,5 @@
 import socket, time, random, threading
-'''
-def threadCountdown(name):
-    tiempo = 30
-    for x in range(30):
-        print('El juego comienza en', tiempo, 'segundos')
-        tiempo -= 1
-        time.sleep(1)
-'''
+
 server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 hostName = socket.gethostname()
 hostIp = socket.gethostbyname(hostName)
@@ -166,7 +159,7 @@ while game:
     for c in clients:
         c.send('kill'.encode())
 
-    #game=False
+    #game = False
 
     if len(gan) > 0:
         print('EL JUGADOR', pos+1, 'HA GANADO!')
