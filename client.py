@@ -3,7 +3,6 @@ import socket
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 host = "192.168.0.13"
 port = 8080
-#port = 8080
 
 try:
     client.connect((host, port))
@@ -49,7 +48,6 @@ while True:
     data = client.recv(1024).decode()
     if '?' in data:
         puntos = count()                                    #Método para contar los puntos que tiene
-        #print("Tus cartas son: ", cards, " = ", puntos)
         decide(puntos, client)                              #Método para decidir si se queda o pide otra
         #break
     elif '♦' in data or '♣' in data or '♥' in data or '♠' in data:
@@ -61,6 +59,6 @@ while True:
         break
     else:
         print(data)
-        
-    
+
+
 client.close()

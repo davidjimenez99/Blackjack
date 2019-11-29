@@ -36,6 +36,7 @@ while game:
     except socket.error as exc:
         pass
     server.settimeout(None)
+
     if connection is not None:
         clients.append(connection)
         #DETENER THREAD
@@ -48,7 +49,6 @@ while game:
 
     contCl = 1
     for c in clients:
-
         for x in range(2):
             rand = int(random.randint(0,(len(deck)-1)))
             card = deck[rand]
@@ -121,6 +121,7 @@ while game:
 
     perd = []
     gan = []
+    emp = []
     maxP = 0
     pos = -1
     for x, punt in enumerate(puntos):
@@ -134,16 +135,16 @@ while game:
                 if numCards[x] < numCards[pos]:
                     maxP = punt
                     pos = x
-                    #FALTA CHECHAR SI TIENEN EL MISMO NUMERO DE CARTAS
+                elif numCards[x] == numCards[pos]:
+                    if x not in emp:
+                        emp.append(x)
+                    if pos not in emp:
+                        emp.append(pos)
+                    pos = -1
 
             
-    
-    gan.append(pos)
-
-
-
-
-
+    if pos != -1:
+        gan.append(pos)
 
 
     #print('perdedor:',perd)                          ############################
@@ -154,11 +155,12 @@ while game:
             #print(x,c,perdedor)
             c.send('HAS GANADO!'.encode())
             #print('Jugador', (i+1), 'ha perdido!')
+        elif x in emp:
+            c.send('HAS EMPATADO!'.encode())
         else:
             c.send('HAS PERDIDO!'.encode())
             #print('Jugador', (i+1), 'ha ganado!')
         c.send('kill'.encode())
-
 
     game=False
 
@@ -166,3 +168,5 @@ if len(gan) > 0:
     print('El jugador', pos+1, 'ha ganado!')
 else:
     print('Ningún jugador ha ganado!')
+
+server.close()
