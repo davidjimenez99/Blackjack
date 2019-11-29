@@ -21,6 +21,10 @@ game=True
 
 while game:
 
+    clients.clear()
+
+    print("\nJUEGO NUEVO COMENZANDO\n")
+
     connection, address = server.accept()
     clients.append(connection)
     connection, address = server.accept()
@@ -147,10 +151,8 @@ while game:
         gan.append(pos)
 
 
-    #print('perdedor:',perd)                          ############################
-    #print('ganador:',gan)                            ############################
-
     for x, c in enumerate(clients):
+        #time.sleep(1)
         if x in gan:
             #print(x,c,perdedor)
             c.send('HAS GANADO!'.encode())
@@ -160,13 +162,16 @@ while game:
         else:
             c.send('HAS PERDIDO!'.encode())
             #print('Jugador', (i+1), 'ha ganado!')
+
+    for c in clients:
         c.send('kill'.encode())
 
-    game=False
+    #game=False
 
-if len(gan) > 0:
-    print('El jugador', pos+1, 'ha ganado!')
-else:
-    print('Ningún jugador ha ganado!')
+    if len(gan) > 0:
+        print('EL JUGADOR', pos+1, 'HA GANADO!')
+    else:
+        print('NINGÚN JUGADOR HA GANADO!')
+
 
 server.close()

@@ -1,7 +1,7 @@
 import socket
 
 client = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-host = "192.168.0.13"
+host = "172.32.137.153"
 port = 8080
 
 try:
